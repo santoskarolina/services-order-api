@@ -1,6 +1,10 @@
 {
   "name": "services-order-api",
   "version": "0.0.1",
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
   "description": "",
   "author": "",
   "private": true,
@@ -13,7 +17,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build --force",
+    "heroku-postbuild": "npm run build",
     "prestart:prod": "npm run build",
     "postinstall": "npm run prestart:prod",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
