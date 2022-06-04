@@ -89,16 +89,10 @@ export class ClienteService {
                     message: `CPF already registered.`
                 }, HttpStatus.BAD_REQUEST)
             }else{
-                const clientToBeUpdated = await getConnection()
-                .createQueryBuilder()
-                .update(Client)
-                .set({
-                    name: clientUpdate.name.toUpperCase(),
-                    cell_phone: clientUpdate.cell_phone,
-                    cpf: clientUpdate.cpf
-                })
-                .where("client_id =:client_id", {client_id:id})
-                .execute()
+                const clientToBeUpdated = await this.clienteRepository.update(cliente.client_id, {
+                    cell_phone : clientUpdate.cell_phone,
+                    name: clientUpdate.name,
+                });
                 return clientToBeUpdated
             }
         }

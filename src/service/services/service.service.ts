@@ -76,6 +76,9 @@ export class ServiceService {
   async update(id: number, serviceUpdate: UpdateServicoDto) {
     const status = await this.statusService.findByCode(20);
     const service = await this.servicoRepository.findOne({
+      where: {
+          service_id: id,
+      },
       relations: ['client', 'status'],
     });
     if (!service) {
@@ -88,19 +91,12 @@ export class ServiceService {
         HttpStatus.BAD_REQUEST,
       );
     } else {
-      const serviceToBeUpdated = await getConnection()
-        .createQueryBuilder()
-        .update(Service)
-        .set({
-          description: serviceUpdate.description,
-          closing_date: serviceUpdate.closing_date
-            ? serviceUpdate.closing_date
-            : null,
-          status: serviceUpdate.status ? serviceUpdate.status : status,
-          price: serviceUpdate.price,
-        })
-        .where('service_id =:service_id', { service_id: id })
-        .execute();
+      const serviceToBeUpdated = await this.servicoRepository.update(service.service_id, {
+        description: serviceUpdate.description,
+        closing_date: serviceUpdate.closing_date,
+        status: serviceUpdate.status,
+        price: serviceUpdate.price
+      });
       return serviceToBeUpdated;
     }
   }

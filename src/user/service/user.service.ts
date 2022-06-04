@@ -114,18 +114,9 @@ export class UserService {
         }
       })
 
-      if (photo) {
-        
-        await getConnection()
-        .createQueryBuilder()
-        .update(User)
-        .set({
-          photo: photo.photo
-        })
-        .where('user_id =:user_id', { user_id: user.user_id })
-        .execute();
-      }
-    return user;
+      return await this.userRepository.update(user.user_id, {
+        photo: photo.photo
+      })
   }
  
 }
