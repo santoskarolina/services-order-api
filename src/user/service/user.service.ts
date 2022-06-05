@@ -114,11 +114,11 @@ export class UserService {
         },
         select: ['photo', 'user_id', 'user_name']
       })
-      const userUpdate =  await this.userRepository.update(user.user_id, {
+      await this.userRepository.update(user.user_id, {
         photo: photo.photo
       })
 
-      return userUpdate
+      return user;
   }
  
 }
