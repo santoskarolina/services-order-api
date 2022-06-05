@@ -124,11 +124,10 @@ export class UserService {
           HttpStatus.BAD_REQUEST,
         );
       }else{
-         await this.userRepository.update(user.user_id, {
+         const updateUser = await this.userRepository.update(user.user_id, {
           photo: photo.photo
-        }).then((value: UpdateResult) => {
-            return value
         })
+        return updateUser;
       }
 
   }
