@@ -111,12 +111,14 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where: {
           user_id: user_id
-        }
+        },
+        select: ['photo', 'user_id', 'user_name']
       })
-
-      return await this.userRepository.update(user.user_id, {
+      const userUpdate =  await this.userRepository.update(user.user_id, {
         photo: photo.photo
       })
+
+      return userUpdate
   }
  
 }
