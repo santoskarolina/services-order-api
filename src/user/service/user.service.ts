@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getConnection, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { User } from '../entities/user.entity';
 import * as crypto from 'crypto';
@@ -92,6 +92,7 @@ export class UserService {
         .createHmac('sha256', new_user.password)
         .digest('hex');
       new_user.creation_date = new Date();
+      if(!new_user.photo) new_user.photo = process.env.USER_PHOTO
       const user = await this.userRepository.save(new_user);
 
      return  user
@@ -127,7 +128,11 @@ export class UserService {
          const updateUser = await this.userRepository.update(user.user_id, {
           photo: photo.photo
         })
-        return updateUser;
+        if(updateUser){
+          return {user: user.user_id, photo: photo.photo, status: HttpStatus.OK, message: 'Foto atualizada com sucesso'};
+        }else{
+          return {error: ErrorsType.USER_DOES_NOT_UPDATE, status: HttpStatus.UNPROCESSABLE_ENTITY, message: 'Foto não atualizada'};
+        }
       }
 
   }
