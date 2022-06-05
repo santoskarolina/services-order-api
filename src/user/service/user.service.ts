@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getConnection } from 'typeorm';
+import { Repository, getConnection, UpdateResult } from 'typeorm';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { User } from '../entities/user.entity';
 import * as crypto from 'crypto';
@@ -114,11 +114,23 @@ export class UserService {
         },
         select: ['photo', 'user_id', 'user_name']
       })
-      await this.userRepository.update(user.user_id, {
-        photo: photo.photo
-      })
+      if(!user){
+        throw new HttpException(
+          {
+            message: 'User not found',
+            error: ErrorsType.NOT_FOUND,
+            status: HttpStatus.BAD_REQUEST,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }else{
+         await this.userRepository.update(user.user_id, {
+          photo: photo.photo
+        }).then((value: UpdateResult) => {
+            return value
+        })
+      }
 
-      return user;
   }
  
 }
