@@ -92,7 +92,7 @@ export class UserService {
         .createHmac('sha256', new_user.password)
         .digest('hex');
       new_user.creation_date = new Date();
-      if(!new_user.photo || new_user.photo == '') new_user.photo = process.env.USER_PHOTO
+      if(!new_user.photo || new_user.photo == '' || new_user.photo == null) {new_user.photo = process.env.USER_PHOTO}
       const user = await this.userRepository.save(new_user);
 
      return  user
