@@ -56,7 +56,7 @@ export class ServiceService {
       where: {
         service_id: id
       },
-      relations: ['client', 'statuas']
+      relations: ['client', 'status']
     });
 
     if (!service) {
