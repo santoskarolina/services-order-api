@@ -104,6 +104,7 @@ export class UserService {
       where: {
         email: email,
       },
+      select: ['creation_date', 'email', 'photo', 'user_name', 'user_id']
     });
     return user;
   }
