@@ -14,6 +14,9 @@ export class UserCreateDto {
   @Length(8, 255, { message: 'Password must be between 8 and 255 characters' })
   password: string;
 
+  @IsNotEmpty({ message: 'occupation_area is required' })
+  occupation_area: string;
+
   creation_date: Date;
 
   photo: string

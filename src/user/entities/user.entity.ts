@@ -25,6 +25,9 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   photo: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  occupation_area: string;
+
   @Column({ type: 'date', nullable: false })
   creation_date: Date;
 
