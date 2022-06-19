@@ -28,7 +28,7 @@ export class UserService {
       where: {
         user_id: userOnline.user_id
       },
-      select: ['user_id', 'creation_date', 'email', 'photo', 'user_name']
+      select: ['user_id', 'creation_date', 'email', 'photo', 'user_name', 'occupation_area']
     })
 
     if (!user) {
