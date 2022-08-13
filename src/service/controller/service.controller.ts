@@ -8,12 +8,13 @@ import {
   Post,
   Put,
   UseGuards,
-  Request,
-} from '@nestjs/common';
+  Request, Query
+} from "@nestjs/common";
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ServicoDto } from '../dto/service.dto';
 import { UpdateServicoDto } from '../dto/update-service.dto';
 import { ServiceService } from '../services/service.service';
+import { IQuery } from "../../error/quer.model";
 
 @UseGuards(JwtAuthGuard)
 @Controller('servicos')
@@ -26,8 +27,8 @@ export class ServiceController {
   }
 
   @Get()
-  findAll(@Request() request) {
-    return this.servicoService.findAll(request.user);
+  findAll(@Request() request, @Query() query: IQuery) {
+    return this.servicoService.findAll(request.user, query);
   }
 
   @Get(':id')

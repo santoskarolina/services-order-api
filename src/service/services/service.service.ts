@@ -8,6 +8,7 @@ import { Repository, getConnection } from 'typeorm';
 import { ServicoDto } from '../dto/service.dto';
 import { UpdateServicoDto } from '../dto/update-service.dto';
 import { Service } from '../entities/service.entity';
+import { IQuery } from "../../error/quer.model";
 
 @Injectable()
 export class ServiceService {
@@ -18,12 +19,25 @@ export class ServiceService {
     private userService: UserService,
   ) {}
 
-  async findAll(user_online: any) {
+  async findAll(user_online: any, query: IQuery) {
+    const take= query.take || 12
+    const page=query.page || 1;
+    const skip= (page-1) * take ;
+
     const user = await this.userService.findUserByEmail(user_online.email);
-    return this.servicoRepository.find({
+    const [services, total] = await this.servicoRepository.findAndCount({
       where: { user: user },
       relations: ['status'],
+      take: take,
+      skip: skip
     });
+
+    return {
+      services: services,
+      page: page,
+      totalSize: services.length,
+      count: total,
+    }
   }
 
   async findOne(id: number, user_online: any) {
@@ -40,11 +54,11 @@ export class ServiceService {
     if (!service) {
       throw new HttpException(
         {
-          status: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.PRECONDITION_FAILED,
           error: ErrorsType.NOT_FOUND,
           message: 'Service not found.',
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.PRECONDITION_FAILED,
       );
     }
     return service;
@@ -62,11 +76,11 @@ export class ServiceService {
     if (!service) {
       throw new HttpException(
         {
-          status: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.PRECONDITION_FAILED,
           message: 'Service not found.',
           error: ErrorsType.NOT_FOUND
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.PRECONDITION_FAILED,
       );
     } else {
       return this.servicoRepository.delete(id);
@@ -84,11 +98,11 @@ export class ServiceService {
     if (!service) {
       throw new HttpException(
         {
-          status: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.PRECONDITION_FAILED,
           message: 'Service not found.',
           error: ErrorsType.NOT_FOUND
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.PRECONDITION_FAILED,
       );
     } else {
       const serviceToBeUpdated = await this.servicoRepository.update(service.service_id, {

@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ClientDto } from '../dto/client.dto';
 import { ClienteService } from '../services/cliente.service';
+import { IQuery } from "../../error/quer.model";
 
 @UseGuards(JwtAuthGuard)
 @Controller('clientes')
@@ -14,8 +15,8 @@ export class ClienteController {
   }
 
   @Get()
-  findAll(@Request() request) {
-    return this.clienteService.findAll(request.user);
+  findAll(@Request() request, @Query() query?: IQuery) {
+    return this.clienteService.findAll(request.user, query);
   }
 
   @Get(':id')

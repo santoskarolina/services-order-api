@@ -1,11 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ErrorsType } from 'src/error/error.enum';
-import { UserService } from 'src/user/service/user.service';
-import { Repository, getConnection, Not } from 'typeorm';
-import { ClientDto } from '../dto/client.dto';
-import { Client } from '../entities/client.entity';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ErrorsType } from "src/error/error.enum";
+import { UserService } from "src/user/service/user.service";
+import { Not, Repository } from "typeorm";
+import { ClientDto } from "../dto/client.dto";
+import { Client } from "../entities/client.entity";
+import { IQuery } from "../../error/quer.model";
 
 @Injectable()
 export class ClienteService {
@@ -16,13 +17,42 @@ export class ClienteService {
         private userService: UserService
     ){}
 
-    async findAll(user_online:any){
+    async findAll(user_online:any, query?: IQuery){
         const user = await this.userService.findUserByEmail(user_online.email)
-        return this.clienteRepository.find(
-            {
+        let resp = {}
+
+        if(Object.values(query).length){
+            const take = query.take || 12
+            const page = query.page || 1;
+            const skip = (page-1) * take ;
+
+            const [users, total] = await  this.clienteRepository.findAndCount(
+              {
+                  where: { user: user},
+                  select:['client_id','name','cell_phone'],
+                  take: take,
+                  skip: skip,
+              })
+
+            resp =  {
+                users: users,
+                page: page,
+                totalSize: users.length,
+                count: total,
+            }
+        }else{
+            const users = await this.clienteRepository.find({
                 where: { user: user},
-                select:['client_id','name','cell_phone']
+                select:['client_id','name','cell_phone'],
             })
+
+            resp = {
+                users: users,
+                totalSize: users.length,
+            }
+        }
+
+        return resp
     }
 
     async findOne(id:number, user_online:any){
@@ -35,10 +65,10 @@ export class ClienteService {
         })
         if(!client){
             throw new HttpException({
-                status: HttpStatus.BAD_REQUEST,
+                status: HttpStatus.PRECONDITION_FAILED,
                 error: ErrorsType.NOT_FOUND,
                 message: 'Customer not found.'
-            }, HttpStatus.BAD_REQUEST)
+            }, HttpStatus.PRECONDITION_FAILED)
         }
         return client
     }
@@ -51,19 +81,19 @@ export class ClienteService {
         })
         if(!client){
             throw new HttpException({
-                status: HttpStatus.BAD_REQUEST,
+                status: HttpStatus.PRECONDITION_FAILED,
                 error: ErrorsType.NOT_FOUND,
                 message: 'Customer not found.'
-            }, HttpStatus.BAD_REQUEST)
+            }, HttpStatus.PRECONDITION_FAILED)
         }else{
             try{
                 return this.clienteRepository.delete(id)
             }catch(error){
                 throw new HttpException({
-                    status: HttpStatus.BAD_REQUEST,
+                    status: HttpStatus.PRECONDITION_FAILED,
                     error: ErrorsType.CANNOT_BE_DELETED,
                     message: 'Customer cannot be deleted.'
-                }, HttpStatus.BAD_REQUEST)
+                }, HttpStatus.PRECONDITION_FAILED)
             }
         }
     }
@@ -76,24 +106,23 @@ export class ClienteService {
         }) // customer not found
         if(!cliente){
             throw new HttpException({
-                status: HttpStatus.BAD_REQUEST,
+                status: HttpStatus.PRECONDITION_FAILED,
                 error: ErrorsType.NOT_FOUND,
                 message: 'Customer not found.'
-            }, HttpStatus.BAD_REQUEST)
+            }, HttpStatus.PRECONDITION_FAILED)
         }else{
             if(await this.clienteRepository.findOne({where: {client_id: Not(id), cpf: clientUpdate.cpf}})){
                 //CPF belongs to another customer
                 throw new HttpException({
-                    status: HttpStatus.BAD_REQUEST,
+                    status: HttpStatus.PRECONDITION_FAILED,
                     error: ErrorsType.CPF_ALREADY_REGISTERED,
                     message: `CPF already registered.`
-                }, HttpStatus.BAD_REQUEST)
+                }, HttpStatus.PRECONDITION_FAILED)
             }else{
-                const clientToBeUpdated = await this.clienteRepository.update(cliente.client_id, {
-                    cell_phone : clientUpdate.cell_phone,
+                return await this.clienteRepository.update(cliente.client_id, {
+                    cell_phone: clientUpdate.cell_phone,
                     name: clientUpdate.name,
-                });
-                return clientToBeUpdated
+                })
             }
         }
     }
@@ -104,11 +133,7 @@ export class ClienteService {
                 cpf: cpf
             }}
         )
-        if(clienteFind){
-           return true
-        }else{
-            return false
-        }
+        return !!clienteFind;
     }
 
     async create(client: ClientDto, user_online:any){
@@ -122,10 +147,10 @@ export class ClienteService {
         )
         if(clienteFind){
             throw new HttpException({
-                status: HttpStatus.BAD_REQUEST,
+                status: HttpStatus.PRECONDITION_FAILED,
                 error: ErrorsType.CPF_ALREADY_REGISTERED,
                 message: 'CPF already registered.'
-            }, HttpStatus.BAD_REQUEST)
+            }, HttpStatus.PRECONDITION_FAILED)
         }
         client.name = client.name.toUpperCase()
         client.user = user
@@ -148,8 +173,8 @@ export class ClienteService {
         const withoutService = clientsWithoutServices.length
 
         return {
-            "clientes": customers.length, 
-            "clientes_com_servico": withService, 
+            "clientes": customers.length,
+            "clientes_com_servico": withService,
             "clientes_sem_servicos":  withoutService
         }
     }
