@@ -27,7 +27,7 @@ export class ServiceController {
   }
 
   @Get()
-  findAll(@Request() request, @Query() query: IQuery) {
+  findAll(@Request() request, @Query() query?: IQuery) {
     return this.servicoService.findAll(request.user, query);
   }
 

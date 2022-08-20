@@ -19,25 +19,41 @@ export class ServiceService {
     private userService: UserService,
   ) {}
 
-  async findAll(user_online: any, query: IQuery) {
-    const take= query.take || 12
-    const page=query.page || 1;
-    const skip= (page-1) * take ;
-
+  async findAll(user_online: any, query?: IQuery) {
     const user = await this.userService.findUserByEmail(user_online.email);
-    const [services, total] = await this.servicoRepository.findAndCount({
-      where: { user: user },
-      relations: ['status'],
-      take: take,
-      skip: skip
-    });
+    let resp = {}
 
-    return {
-      services: services,
-      page: page,
-      totalSize: services.length,
-      count: total,
+    if(Object.keys(query).length){
+      const take= query.take || 12
+      const page=query.page || 1;
+      const skip= (page-1) * take ;
+  
+      const [services, total] = await this.servicoRepository.findAndCount({
+        where: { user: user },
+        relations: ['status'],
+        take: take,
+        skip: skip
+      });
+  
+      resp =  {
+        services: services,
+        page: page,
+        totalSize: services.length,
+        count: total,
+      }
+    }else{
+      const services = await this.servicoRepository.find({
+        where: { user: user},
+        relations: ['status'],
+    })
+
+    resp = {
+        users: services,
+        totalSize: services.length,
     }
+    }
+
+    return resp;
   }
 
   async findOne(id: number, user_online: any) {
