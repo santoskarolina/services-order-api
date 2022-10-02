@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ErrorsType } from 'src/error/error.enum';
 import { StatusService } from 'src/status/services/status.service';
 import { UserService } from 'src/user/service/user.service';
-import { Repository, getConnection } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ServicoDto } from '../dto/service.dto';
 import { UpdateServicoDto } from '../dto/update-service.dto';
 import { Service } from '../entities/service.entity';
@@ -22,15 +22,22 @@ export class ServiceService {
   async findAll(user_online: any, query?: IQuery) {
     const user = await this.userService.findUserByEmail(user_online.email);
     let resp = {}
+    let whereFilter = {}
 
     if(Object.keys(query).length){
       const take= query.take || 12
       const page=query.page || 1;
       const skip= (page-1) * take ;
+
+      if(query.filter){
+        whereFilter = { user: user, status: {name: query.filter} }
+      } else{
+        whereFilter = { user: user }
+      }
   
       const [services, total] = await this.servicoRepository.findAndCount({
-        where: { user: user },
-        relations: ['status'],
+        where: whereFilter,
+        relations: {status: true},
         take: take,
         skip: skip
       });
