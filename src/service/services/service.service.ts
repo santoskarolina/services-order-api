@@ -17,50 +17,83 @@ export class ServiceService {
     private servicoRepository: Repository<Service>,
     private statusService: StatusService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   async findAll(user_online: any, query?: IQuery) {
     const user = await this.userService.findUserByEmail(user_online.email);
     let resp = {}
-    let whereFilter = {}
 
-    if(Object.keys(query).length){
-      const take= query.take || 12
-      const page=query.page || 1;
-      const skip= (page-1) * take ;
-
-      if(query.filter){
-        whereFilter = { user: user, status: {name: query.filter} }
-      } else{
-        whereFilter = { user: user }
-      }
-  
-      const [services, total] = await this.servicoRepository.findAndCount({
-        where: whereFilter,
-        relations: {status: true},
-        take: take,
-        skip: skip
-      });
-  
-      resp =  {
-        services: services,
-        page: page,
-        totalSize: services.length,
-        count: total,
-      }
-    }else{
-      const services = await this.servicoRepository.find({
-        where: { user: user},
-        relations: ['status'],
-    })
-
-    resp = {
-        users: services,
-        totalSize: services.length,
-    }
+    if (Object.keys(query).length) {
+      resp = this.findWithQueryOptions(query, user)
+    } else {
+      resp = this.findWithotQuery(user)
     }
 
     return resp;
+  }
+
+  async findWithQueryOptions(query, user) {
+    let whereFilter = {}
+
+    const take = query.take || 12
+    const page = query.page || 1;
+    const skip = (page - 1) * take;
+
+    if (query.filter) {
+      whereFilter = { user: user, status: { name: query.filter } }
+    } else {
+      whereFilter = { user: user }
+    }
+
+    const [services, total] = await this.createFindOptions(whereFilter, take, skip)
+
+    const response = this.createResponse(services, page, total)
+    return response
+  }
+
+  async findWithotQuery(user) {
+    const services = await this.servicoRepository.find({
+      where: { user: user },
+      relations: ['status'],
+    })
+
+    const resp = {
+      users: services,
+      totalSize: services.length,
+    }
+
+    return resp
+  }
+
+  async createFindOptions(whereFilter, take, skip) {
+    const query = await this.servicoRepository.findAndCount({
+      where: whereFilter,
+      relations: { status: true },
+      take: take,
+      skip: skip
+    });
+    return query
+  }
+
+  createResponse(services, page, total) {
+    const resp = {
+      services: services,
+      page: page,
+      totalSize: services.length,
+      count: total,
+    }
+    return resp
+  }
+
+  throwHttpException(message: string, error: ErrorsType, status: HttpStatus) {
+    throw new HttpException(
+      {
+        message: message,
+        error: error,
+        status: status,
+      },
+      status,
+    );
   }
 
   async findOne(id: number, user_online: any) {
@@ -75,20 +108,12 @@ export class ServiceService {
     })
 
     if (!service) {
-      throw new HttpException(
-        {
-          status: HttpStatus.PRECONDITION_FAILED,
-          error: ErrorsType.NOT_FOUND,
-          message: 'Service not found.',
-        },
-        HttpStatus.PRECONDITION_FAILED,
-      );
+      this.throwHttpException('Service not found.', ErrorsType.NOT_FOUND, HttpStatus.PRECONDITION_FAILED)
     }
     return service;
   }
 
   async delete(id: number) {
-
     const service = await this.servicoRepository.findOne({
       where: {
         service_id: id
@@ -97,14 +122,7 @@ export class ServiceService {
     });
 
     if (!service) {
-      throw new HttpException(
-        {
-          status: HttpStatus.PRECONDITION_FAILED,
-          message: 'Service not found.',
-          error: ErrorsType.NOT_FOUND
-        },
-        HttpStatus.PRECONDITION_FAILED,
-      );
+      this.throwHttpException('Service not found.', ErrorsType.NOT_FOUND, HttpStatus.PRECONDITION_FAILED)
     } else {
       return this.servicoRepository.delete(id);
     }
@@ -114,28 +132,25 @@ export class ServiceService {
     const status = await this.statusService.findByCode(20);
     const service = await this.servicoRepository.findOne({
       where: {
-          service_id: id,
+        service_id: id,
       },
       relations: ['client', 'status'],
     });
     if (!service) {
-      throw new HttpException(
-        {
-          status: HttpStatus.PRECONDITION_FAILED,
-          message: 'Service not found.',
-          error: ErrorsType.NOT_FOUND
-        },
-        HttpStatus.PRECONDITION_FAILED,
-      );
+      this.throwHttpException('Service not found.', ErrorsType.NOT_FOUND, HttpStatus.PRECONDITION_FAILED)
     } else {
-      const serviceToBeUpdated = await this.servicoRepository.update(service.service_id, {
-        description: serviceUpdate.description,
-        closing_date: serviceUpdate.closing_date,
-        status: serviceUpdate.status,
-        price: serviceUpdate.price
-      });
-      return serviceToBeUpdated;
+      return this.confirmUpdateService(serviceUpdate, service)
     }
+  }
+
+  async confirmUpdateService(serviceUpdate: UpdateServicoDto, service: Service) {
+    const serviceToBeUpdated = await this.servicoRepository.update(service.service_id, {
+      description: serviceUpdate.description,
+      closing_date: serviceUpdate.closing_date,
+      status: serviceUpdate.status,
+      price: serviceUpdate.price
+    });
+    return serviceToBeUpdated;
   }
 
   async create(service: ServicoDto, user_online: any) {

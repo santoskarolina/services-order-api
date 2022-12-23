@@ -32,14 +32,7 @@ export class UserService {
     })
 
     if (!user) {
-      throw new HttpException(
-        {
-          message: 'User not found.',
-          status: HttpStatus.BAD_REQUEST,
-          error: ErrorsType.NOT_FOUND,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      this.throwHttpException('User not found.', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
     }
     return user;
   }
@@ -52,14 +45,7 @@ export class UserService {
       relations: ['clients', 'services'],
     });
     if (!user) {
-      throw new HttpException(
-        {
-          message: 'User not found.',
-          status: HttpStatus.BAD_REQUEST,
-          error: ErrorsType.NOT_FOUND
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      this.throwHttpException('User not found.', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
     }
     return user;
   }
@@ -79,14 +65,7 @@ export class UserService {
       },
     });
     if (user) {
-      throw new HttpException(
-        {
-          message: 'Email already registred.',
-          error: ErrorsType.EMAIL_ALREADY_REGISTERED,
-          status: HttpStatus.BAD_REQUEST,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      this.throwHttpException('Email already registred.', ErrorsType.EMAIL_ALREADY_REGISTERED, HttpStatus.BAD_REQUEST)
     } else {
       new_user.password = crypto
         .createHmac('sha256', new_user.password)
@@ -109,6 +88,17 @@ export class UserService {
     return user;
   }
 
+  throwHttpException(message: string, error: ErrorsType, status:HttpStatus ){
+    throw new HttpException(
+      {
+        message: message,
+        error: error,
+        status: status,
+      },
+      status,
+    );
+  }
+
   async updatePhoto(photo: UserUpdatePhotoDto, user_id: number){
       const user = await this.userRepository.findOne({
         where: {
@@ -117,14 +107,7 @@ export class UserService {
         select: ['photo', 'user_id', 'user_name']
       })
       if(!user){
-        throw new HttpException(
-          {
-            message: 'User not found',
-            error: ErrorsType.NOT_FOUND,
-            status: HttpStatus.BAD_REQUEST,
-          },
-          HttpStatus.BAD_REQUEST,
-        );
+        this.throwHttpException('User not found', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
       }else{
          const updateUser = await this.userRepository.update(user.user_id, {
           photo: photo.photo
