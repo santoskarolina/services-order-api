@@ -99,6 +99,8 @@ export class ClienteService {
     }
 
     async update(id:number, clientUpdate: ClientDto){
+        console.log("🚀 ~ file: cliente.service.ts:102 ~ ClienteService ~ update ~ id", id)
+        console.log("🚀 ~ file: cliente.service.ts:102 ~ ClienteService ~ update ~ clientUpdate", clientUpdate)
         const cliente = await this.clienteRepository.findOne({
             where: {
                 client_id: id
@@ -111,7 +113,8 @@ export class ClienteService {
                 message: 'Customer not found.'
             }, HttpStatus.PRECONDITION_FAILED)
         }else{
-            if(await this.clienteRepository.findOne({where: {client_id: Not(id), cpf: clientUpdate.cpf}})){
+            const useriWithcpf = await this.clienteRepository.findOne({where: {client_id: Not(id), cpf: clientUpdate.cpf}})
+            if(useriWithcpf){
                 //CPF belongs to another customer
                 throw new HttpException({
                     status: HttpStatus.PRECONDITION_FAILED,

@@ -26,7 +26,7 @@ export class ServiceService {
     if (Object.keys(query).length) {
       resp = this.findWithQueryOptions(query, user)
     } else {
-      resp = this.findWithotQuery(user)
+      resp = this.findWithoutQuery(user)
     }
 
     return resp;
@@ -51,14 +51,17 @@ export class ServiceService {
     return response
   }
 
-  async findWithotQuery(user) {
+  async findWithoutQuery(user) {
     const services = await this.servicoRepository.find({
       where: { user: user },
-      relations: ['status'],
+      relations: {
+          status: true,
+          client: true
+      },
     })
 
     const resp = {
-      users: services,
+      services: services,
       totalSize: services.length,
     }
 
