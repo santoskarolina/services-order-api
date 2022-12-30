@@ -24,10 +24,6 @@ export class AuthService {
   }
 
   async login(user: any) {
-    console.log(
-      '🚀 ~ file: auth.service.ts:27 ~ AuthService ~ login ~ user',
-      user,
-    );
     const userfind = await this.userService.findUserByEmail(user.email);
     const payload = { email: user.email, sub: user.id };
     return {
