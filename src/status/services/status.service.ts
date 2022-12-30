@@ -1,41 +1,41 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Status } from '../entities/status.entity';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { Status } from '../entities/status.entity'
 
 @Injectable()
 export class StatusService {
-  constructor(
+  constructor (
     @InjectRepository(Status)
-    private statusRepository: Repository<Status>,
+    private readonly statusRepository: Repository<Status>
   ) {}
 
-  async findAll() {
-    const status = await this.statusRepository.find();
+  async findAll () {
+    const status = await this.statusRepository.find()
     const resp = {
-      status: status,
-      totalSize: status.length,
-    };
+      status,
+      totalSize: status.length
+    }
 
-    return resp;
+    return resp
   }
 
-  async findByCode(code: number) {
+  async findByCode (code: number) {
     const status = await this.statusRepository.findOne({
       where: {
-        code: code,
+        code
       },
-      relations: ['services'],
-    });
+      relations: ['services']
+    })
     if (!status) {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          message: 'Status not found.',
+          message: 'Status not found.'
         },
-        HttpStatus.BAD_REQUEST,
-      );
+        HttpStatus.BAD_REQUEST
+      )
     }
-    return status;
+    return status
   }
 }

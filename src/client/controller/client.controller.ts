@@ -1,46 +1,46 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ClientDto } from '../dto/client.dto';
-import { ClienteService } from '../services/cliente.service';
-import { IQuery } from "../../error/quer.model";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common'
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
+import { ClientDto } from '../dto/client.dto'
+import { ClienteService } from '../services/cliente.service'
+import { IQuery } from '../../error/quer.model'
 
 @UseGuards(JwtAuthGuard)
 @Controller('clientes')
 export class ClienteController {
-  constructor(private readonly clienteService: ClienteService) {}
+  constructor (private readonly clienteService: ClienteService) {}
 
   @Post()
-  create(@Body() createClienteDto: ClientDto, @Request() request) {
-    return this.clienteService.create(createClienteDto, request.user);
+  async create (@Body() createClienteDto: ClientDto, @Request() request) {
+    return await this.clienteService.create(createClienteDto, request.user)
   }
 
   @Get()
-  findAll(@Request() request, @Query() query?: IQuery) {
-    return this.clienteService.findAll(request.user, query);
+  async findAll (@Request() request, @Query() query?: IQuery) {
+    return await this.clienteService.findAll(request.user, query)
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number, @Request() request) {
-    return this.clienteService.findOne(id, request.user);
+  async findOne (@Param('id') id: number, @Request() request) {
+    return await this.clienteService.findOne(id, request.user)
   }
 
   @Get('buscar/:cpf')
-  findOneByCpf(@Param('cpf') cpf: string) {
-    return this.clienteService.findByCpf(cpf);
+  async findOneByCpf (@Param('cpf') cpf: string) {
+    return await this.clienteService.findByCpf(cpf)
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateClienteDto: ClientDto) {
-    return this.clienteService.update(id, updateClienteDto);
+  async update (@Param('id') id: number, @Body() updateClienteDto: ClientDto) {
+    return await this.clienteService.update(id, updateClienteDto)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.clienteService.delete(id);
+  async remove (@Param('id') id: number) {
+    return await this.clienteService.delete(id)
   }
 
   @Get('servicos/relatorios')
-  reports(@Request() request){
-    return this.clienteService.reports(request.user)
+  async reports (@Request() request) {
+    return await this.clienteService.reports(request.user)
   }
 }

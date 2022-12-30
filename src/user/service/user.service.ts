@@ -1,32 +1,31 @@
-/* eslint-disable prettier/prettier */
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserCreateDto } from '../dto/user-create.dto';
-import { User } from '../entities/user.entity';
-import * as crypto from 'crypto';
-import { UserUpdatePhotoDto } from '../dto/user_update_photo.dto';
-import { ErrorsType } from 'src/error/error.enum';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { UserCreateDto } from '../dto/user-create.dto'
+import { User } from '../entities/user.entity'
+import * as crypto from 'crypto'
+import { UserUpdatePhotoDto } from '../dto/user_update_photo.dto'
+import { ErrorsType } from 'src/error/error.enum'
 
 @Injectable()
 export class UserService {
-  constructor(
+  constructor (
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>
   ) {}
 
-  findAll() {
-    return this.userRepository.find({
-      select: ['user_id', 'user_name', 'email', 'photo'],
-    });
+  async findAll () {
+    return await this.userRepository.find({
+      select: ['user_id', 'user_name', 'email', 'photo']
+    })
   }
 
-  async findOne(user_online: any) {
-    const userOnline = await this.findUserByEmail(user_online.email);
+  async findOne (userRequest: any) {
+    const userOnline = await this.findUserByEmail(userRequest.email)
 
     const user = await this.userRepository.findOne({
       where: {
-        user_id: userOnline.user_id
+        user_id: userOnline?.user_id
       },
       select: ['user_id', 'creation_date', 'email', 'photo', 'user_name', 'occupation_area']
     })
@@ -34,91 +33,92 @@ export class UserService {
     if (!user) {
       this.throwHttpException('User not found.', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
     }
-    return user;
+    return user
   }
 
-  async findOneWithRelations(id: number) {
+  async findOneWithRelations (id: number) {
     const user = await this.userRepository.findOne({
       where: {
-          user_id: id
+        user_id: id
       },
-      relations: ['clients', 'services'],
-    });
+      relations: ['clients', 'services']
+    })
     if (!user) {
       this.throwHttpException('User not found.', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
     }
-    return user;
+    return user
   }
 
-  async findByEmail(email: string) {
+  async findByEmail (email: string) {
     return await this.userRepository.findOne({
       where: {
-        email: email,
-      },
-    });
+        email
+      }
+    })
   }
 
-  async create(new_user: UserCreateDto) {
+  async create (newUser: UserCreateDto) {
     const user = await this.userRepository.findOne({
       where: {
-        email: new_user.email,
-      },
-    });
+        email: newUser.email
+      }
+    })
     if (user) {
       this.throwHttpException('Email already registred.', ErrorsType.EMAIL_ALREADY_REGISTERED, HttpStatus.BAD_REQUEST)
     } else {
-      new_user.password = crypto
-        .createHmac('sha256', new_user.password)
-        .digest('hex');
-      new_user.creation_date = new Date();
-      if(!new_user.photo || new_user.photo == '' || new_user.photo == null) {new_user.photo = process.env.USER_PHOTO}
-      const user = await this.userRepository.save(new_user);
+      newUser.password = crypto
+        .createHmac('sha256', newUser.password)
+        .digest('hex')
+      newUser.creation_date = new Date()
+      if (!newUser.photo || newUser.photo === '') {
+        const photo = process.env.USER_PHOTO
+        newUser.photo = photo
+      }
+      const user = await this.userRepository.save(newUser)
 
-     return  user
+      return user
     }
   }
 
-  async findUserByEmail(email: string) {
+  async findUserByEmail (email: string) {
     const user = await this.userRepository.findOne({
       where: {
-        email: email,
+        email
       },
       select: ['creation_date', 'email', 'photo', 'user_name', 'user_id']
-    });
-    return user;
+    })
+    return user
   }
 
-  throwHttpException(message: string, error: ErrorsType, status:HttpStatus ){
+  throwHttpException (message: string, error: ErrorsType, status: HttpStatus) {
     throw new HttpException(
       {
-        message: message,
-        error: error,
-        status: status,
+        message,
+        error,
+        status
       },
-      status,
-    );
+      status
+    )
   }
 
-  async updatePhoto(photo: UserUpdatePhotoDto, user_id: number){
-      const user = await this.userRepository.findOne({
-        where: {
-          user_id: user_id
-        },
-        select: ['photo', 'user_id', 'user_name']
+  async updatePhoto (photo: UserUpdatePhotoDto, userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        user_id: userId
+      },
+      select: ['photo', 'user_id', 'user_name']
+    })
+    if (!user) {
+      this.throwHttpException('User not found', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
+    } else {
+      const updateUser = await this.userRepository.update(user.user_id, {
+        photo: photo.photo
       })
-      if(!user){
-        this.throwHttpException('User not found', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
-      }else{
-         const updateUser = await this.userRepository.update(user.user_id, {
-          photo: photo.photo
-        })
-        if(updateUser){
-          return {user: user.user_id, photo: photo.photo, status: HttpStatus.OK, message: 'Foto atualizada com sucesso'};
-        }else{
-          return {error: ErrorsType.USER_DOES_NOT_UPDATE, status: HttpStatus.UNPROCESSABLE_ENTITY, message: 'Foto não atualizada'};
-        }
+      if (updateUser) {
+        return { user: user.user_id, photo: photo.photo, status: HttpStatus.OK, message: 'Foto atualizada com sucesso' }
+      } else {
+        return { error: ErrorsType.USER_DOES_NOT_UPDATE, status: HttpStatus.UNPROCESSABLE_ENTITY, message: 'Foto não atualizada' }
       }
-
+    }
   }
- 
 }

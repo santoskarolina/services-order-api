@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -8,41 +7,41 @@ import {
   UseGuards,
   Request,
   Put
-} from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserCreateDto } from '../dto/user-create.dto';
-import { UserUpdatePhotoDto } from '../dto/user_update_photo.dto';
-import { UserService } from '../service/user.service';
+} from '@nestjs/common'
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
+import { UserCreateDto } from '../dto/user-create.dto'
+import { UserUpdatePhotoDto } from '../dto/user_update_photo.dto'
+import { UserService } from '../service/user.service'
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor (private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll () {
+    return await this.userService.findAll()
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('infos')
-  findOne(@Request() request) {
-    return this.userService.findOne(request.user);
+  async findOne (@Request() request) {
+    return await this.userService.findOne(request.user)
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/relations')
-  findOneWithRelations(@Param('id') id: number) {
-    return this.userService.findOneWithRelations(id);
+  async findOneWithRelations (@Param('id') id: number) {
+    return await this.userService.findOneWithRelations(id)
   }
 
   @Post()
-  create(@Body() new_user: UserCreateDto) {
-    return this.userService.create(new_user);
+  async create (@Body() newUser: UserCreateDto) {
+    return await this.userService.create(newUser)
   }
 
   @Put('update-photo/:id')
-  updatePhoto(@Body() photo:UserUpdatePhotoDto, @Param('id') id: number) {
-    return this.userService.updatePhoto(photo, id);
+  async updatePhoto (@Body() photo: UserUpdatePhotoDto, @Param('id') id: number) {
+    return await this.userService.updatePhoto(photo, id)
   }
 }

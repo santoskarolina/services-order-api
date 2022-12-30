@@ -1,39 +1,38 @@
-/* eslint-disable prettier/prettier */
-import { Service } from 'src/service/entities/service.entity';
-import { Client } from 'src/client/entities/client.entity';
+import { Service } from 'src/service/entities/service.entity'
+import { Client } from 'src/client/entities/client.entity'
 import {
   PrimaryGeneratedColumn,
   Entity,
   Column,
-  OneToMany,
-} from 'typeorm';
+  OneToMany
+} from 'typeorm'
 
 @Entity({ name: 'user', schema: 'servicos' })
 export class User {
   @PrimaryGeneratedColumn({ type: 'int' })
-  user_id: number;
+    user_id: number
 
   @Column({ type: 'varchar', length: 255, nullable: false })
-  user_name: string;
+    user_name: string
 
   @Column({ type: 'varchar', length: 255, nullable: false })
-  email: string;
+    email: string
 
   @Column({ type: 'varchar', length: 255, nullable: false })
-  password: string;
+    password: string
 
   @Column({ type: 'varchar', length: 255, nullable: false })
-  photo: string;
+    photo: string
 
   @Column({ type: 'varchar', length: 255, nullable: false })
-  occupation_area: string;
+    occupation_area: string
 
   @Column({ type: 'date', nullable: false })
-  creation_date: Date;
+    creation_date: Date
 
   @OneToMany(() => Service, (service) => service.user)
-  services: Service[];
+    services: Service[]
 
   @OneToMany(() => Client, (client) => client.user)
-  clients: Client[];
+    clients: Client[]
 }
