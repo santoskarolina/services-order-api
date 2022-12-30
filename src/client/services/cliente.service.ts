@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { User } from './../../user/entities/user.entity';
-/* eslint-disable prettier/prettier */
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorsType } from "src/error/error.enum";
@@ -180,11 +178,10 @@ export class ClienteService {
 
     async reports(user_online: any) {
         const user = await this.userService.findByEmail(user_online.email)
-        const customers = await this.clienteRepository.find(
-            {
+        const customers = await this.clienteRepository.find({
                 where: { user: user },
                 relations: ['services']
-            })
+        })
 
         const clientsWithServices = customers.filter((c) => c.services.length > 0) //list clients with services
         const clientsWithoutServices = customers.filter((c) => c.services.length <= 0) // list customers without services

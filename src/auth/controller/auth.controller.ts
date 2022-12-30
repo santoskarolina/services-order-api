@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Controller, Post, UseGuards, Request, Body } from "@nestjs/common";
 import { UserLogin } from "src/user/dto/user.login";
 import { LocalAuthGuard } from "../guards/local-auth.guard";
@@ -12,6 +13,11 @@ export class AuthController{
     @Post('auth/login')
     async login(@Body() user: UserLogin){
         return this.authService.login(user)
+    }
+
+    @Post('auth/validation')
+    async checkUser(@Request() request){
+        return this.authService.checkUser(request.headers.authorization)
     }
 
 }

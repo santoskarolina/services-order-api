@@ -1,25 +1,28 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: 'tsconfig.json',
-    tsconfigRootDir : __dirname, 
-    sourceType: 'module',
-  },
-  plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
-  root: true,
   env: {
+    es2021: true,
     node: true,
-    jest: true,
+    jest: true
   },
-  ignorePatterns: ['.eslintrc.js'],
+  extends: 'standard-with-typescript',
+  overrides: [
+  ],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: './tsconfig.json'
+  },
   rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
+    indent: 'off',
+    '@typescript-eslint/indent': ['error', 2],
+    allowExpressions: 'off',
+    'no-console': 'error',
+    'no-misudes-promises': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-  },
-};
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/no-throw-literal': 'off',
+    '@typescript-eslint/no-misuses-promises': 'off',
+    '@typescript-eslint/no-base-to-string': 'off'
+  }
+}

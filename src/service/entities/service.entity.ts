@@ -1,6 +1,6 @@
 import { Client } from "src/client/entities/client.entity";
 import { Status } from "src/status/entities/status.entity";
-import { User } from "src/user/entities/user.entity"
+import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name:'service', schema:'servicos'})
