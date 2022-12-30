@@ -27,7 +27,7 @@ export class ServiceController {
 
   @Get()
   async findAll (@Request() request, @Query() query?: IQuery) {
-    return await this.servicoService.findAll(request.user, query)
+    return await this.servicoService.findAll(request.user, query as IQuery)
   }
 
   @Get(':id')

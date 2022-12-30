@@ -1,3 +1,4 @@
+import { User } from 'src/user/entities/user.entity'
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ErrorsType } from 'src/error/error.enum'
@@ -18,8 +19,8 @@ export class ServiceService {
     private readonly userService: UserService
   ) { }
 
-  async findAll (user_online: any, query?: IQuery) {
-    const user = await this.userService.findUserByEmail(user_online.email)
+  async findAll (userOnline: any, query: IQuery) {
+    const user = await this.userService.findUserByEmail(userOnline.email)
     let resp = {}
 
     if (Object.keys(query).length) {
@@ -98,13 +99,13 @@ export class ServiceService {
     )
   }
 
-  async findOne (id: number, user_online: any) {
-    const user = await this.userService.findUserByEmail(user_online.email)
+  async findOne (id: number, userOnline: any) {
+    const user = await this.userService.findUserByEmail(userOnline.email)
 
     const service = await this.servicoRepository.findOne({
       where: {
         service_id: id,
-        user
+        user: user as User
       },
       relations: ['client', 'status']
     })
@@ -131,7 +132,6 @@ export class ServiceService {
   }
 
   async update (id: number, serviceUpdate: UpdateServicoDto) {
-    const status = await this.statusService.findByCode(20)
     const service = await this.servicoRepository.findOne({
       where: {
         service_id: id
@@ -155,25 +155,25 @@ export class ServiceService {
     return serviceToBeUpdated
   }
 
-  async create (service: ServicoDto, user_online: any) {
-    const user = await this.userService.findUserByEmail(user_online.email)
+  async create (service: ServicoDto, userOnline: any) {
+    const user = await this.userService.findUserByEmail(userOnline.email)
     const status = await this.statusService.findByCode(10)
-    service.user = user
+    service.user = user as User
     service.opening_date = new Date()
     service.status = status
     return await this.servicoRepository.save(service)
   }
 
-  async reportService (user_online: any) {
-    const user = await this.userService.findUserByEmail(user_online.email)
+  async reportService (userOnline: any) {
+    const user = await this.userService.findUserByEmail(userOnline.email)
 
     const services = await this.servicoRepository.find({
-      where: { user },
+      where: { user: user as User },
       relations: ['status']
     })
 
-    const servicesOpen = services.filter((s) => s.status.code == 10)
-    const servicesClose = services.filter((s) => s.status.code == 20)
+    const servicesOpen = services.filter((s) => s.status.code === 10)
+    const servicesClose = services.filter((s) => s.status.code === 20)
 
     const totalOpen = servicesOpen.length
     const totalClose = servicesClose.length

@@ -27,12 +27,12 @@ export class ClienteService {
     )
   }
 
-  async findAll (user_online: any, query?: IQuery) {
-    const user = await this.userService.findUserByEmail(user_online.email)
+  async findAll (userOnline: any, query?: IQuery) {
+    const user = await this.userService.findUserByEmail(userOnline.email)
     let usersList = {}
 
-    if (Object.values(query).length) {
-      usersList = await this.finfAllUsersWithQuery(user, query)
+    if (Object.values(query as IQuery).length) {
+      usersList = await this.finfAllUsersWithQuery(user as User, query as IQuery)
     } else {
       usersList = this.findAllUsersWithoutQuery(user)
     }
@@ -89,8 +89,8 @@ export class ClienteService {
     return usersList
   }
 
-  async findOne (id: number, user_online: any) {
-    const user = await this.userService.findByEmail(user_online.email)
+  async findOne (id: number, userOnline: any) {
+    const user = await this.userService.findByEmail(userOnline.email)
     const client = await this.clienteRepository.findOne({
       where: {
         client_id: id,
@@ -133,13 +133,13 @@ export class ClienteService {
     }
   }
 
-  async confirmUpdateCLient (clientUpdate, client_id) {
-    const useriWithcpf = await this.clienteRepository.findOne({ where: { client_id: Not(client_id), cpf: clientUpdate.cpf } })
+  async confirmUpdateCLient (clientUpdate, clientId: number) {
+    const useriWithcpf = await this.clienteRepository.findOne({ where: { client_id: Not(clientId), cpf: clientUpdate.cpf } })
 
     if (useriWithcpf) {
       this.throwHttpException('CPF already registered.', ErrorsType.CPF_ALREADY_REGISTERED, HttpStatus.PRECONDITION_FAILED)
     } else {
-      return await this.clienteRepository.update(client_id, {
+      return await this.clienteRepository.update(clientId, {
         cell_phone: clientUpdate.cell_phone,
         name: clientUpdate.name
       })
@@ -169,12 +169,12 @@ export class ClienteService {
       this.throwHttpException('CPF already registered.', ErrorsType.CPF_ALREADY_REGISTERED, HttpStatus.PRECONDITION_FAILED)
     }
     client.name = client.name.toUpperCase()
-    client.user = user
+    client.user = user as User
     return await this.clienteRepository.save(client)
   }
 
-  async reports (user_online: any) {
-    const user = await this.userService.findByEmail(user_online.email)
+  async reports (userOnline: any) {
+    const user = await this.userService.findByEmail(userOnline.email)
     const customers = await this.clienteRepository.find({
       where: { user },
       relations: ['services']

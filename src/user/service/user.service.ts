@@ -50,11 +50,15 @@ export class UserService {
   }
 
   async findByEmail (email: string) {
-    return await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: {
         email
       }
     })
+
+    if (user) {
+      return user
+    }
   }
 
   async create (newUser: UserCreateDto) {
@@ -72,7 +76,7 @@ export class UserService {
       newUser.creation_date = new Date()
       if (!newUser.photo || newUser.photo === '') {
         const photo = process.env.USER_PHOTO
-        newUser.photo = photo
+        newUser.photo = photo ?? ''
       }
       const user = await this.userRepository.save(newUser)
 
