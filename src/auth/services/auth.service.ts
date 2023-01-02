@@ -24,7 +24,7 @@ export class AuthService {
     return null
   }
 
-  async checkUser (token: string) {
+  async checkUserToken (token: string) {
     const tokenKey = token.split(' ')[1]
     const user = JSON.parse(Buffer.from(tokenKey.split('.')[1], 'base64').toString())
 

@@ -15,6 +15,6 @@ export class AuthController {
 
   @Post('auth/validation')
   async checkUser (@Request() request) {
-    return await this.authService.checkUser(request.headers.authorization)
+    return await this.authService.checkUserToken(request.headers.authorization)
   }
 }

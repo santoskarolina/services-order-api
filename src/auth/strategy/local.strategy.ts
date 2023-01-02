@@ -9,7 +9,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({
       usernameField: 'email',
       passwordField: 'password'
-
     })
   }
 

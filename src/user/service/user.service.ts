@@ -1,3 +1,4 @@
+/* eslint-disable no-multi-spaces */
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -11,7 +12,8 @@ import { ErrorsType } from 'src/error/error.enum'
 export class UserService {
   constructor (
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    // eslint-disable-next-line @typescript-eslint/prefer-readonly
+    private userRepository: Repository<User>
   ) {}
 
   async findAll () {
@@ -49,7 +51,15 @@ export class UserService {
     return user
   }
 
-  async findByEmail (email: string) {
+  async findByEmail (userEmail: string) {
+    return await this.userRepository.findOne({
+      where: {
+        email: userEmail
+      }
+    })
+  }
+
+  async findByEmailSn (email: string) {
     const user = await this.userRepository.findOne({
       where: {
         email
@@ -115,14 +125,18 @@ export class UserService {
     if (!user) {
       this.throwHttpException('User not found', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
     } else {
-      const updateUser = await this.userRepository.update(user.user_id, {
+      return await this.confirmUpdateUserPhoto(user, photo)
+    }
+  }
+
+  async confirmUpdateUserPhoto (user: User, photo: UserUpdatePhotoDto) {
+    try {
+      await this.userRepository.update(user.user_id, {
         photo: photo.photo
       })
-      if (updateUser) {
-        return { user: user.user_id, photo: photo.photo, status: HttpStatus.OK, message: 'Foto atualizada com sucesso' }
-      } else {
-        return { error: ErrorsType.USER_DOES_NOT_UPDATE, status: HttpStatus.UNPROCESSABLE_ENTITY, message: 'Foto não atualizada' }
-      }
+      return { user: user.user_id, photo: photo.photo, status: HttpStatus.OK, message: 'Foto atualizada com sucesso' }
+    } catch (error) {
+      this.throwHttpException('User could not be updated', ErrorsType.USER_DOES_NOT_UPDATE, HttpStatus.UNPROCESSABLE_ENTITY)
     }
   }
 }

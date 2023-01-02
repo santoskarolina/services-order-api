@@ -1,32 +1,21 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "target": "es2016",
     "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "useUnknownInCatchVariables": false,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "strictNullChecks": true,
-    "outDir": ".build",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
     "sourceMap": true,
-    "resolveJsonModule": true,
-    "preserveConstEnums": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
     "noImplicitAny": false,
-    "lib": [
-      "ES2016"
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@controllers/*": ["./src/controllers/*"],
-      "@services/*": ["./src/services/*"],
-      "@models/*": ["./src/models/*"],
-      "@config": ["./src/config"],
-      "@/types/*": ["./src/types/*"],
-      "@lib/*": ["./lib/*"],
-      "@app": ["./src/app"],
-      "@docs-setup": ["./swaggerConf"]
-    }
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false
   }
 }
