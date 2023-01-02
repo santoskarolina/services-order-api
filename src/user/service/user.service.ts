@@ -140,7 +140,8 @@ export class UserService {
       await this.userRepository.update(user.user_id, {
         photo: photo.photo
       })
-      return { user: user.user_id, photo: photo.photo, status: HttpStatus.OK, message: 'Foto atualizada com sucesso' }
+      const userUpdated = { ...user, photo: photo.photo }
+      return userUpdated
     } catch (error) {
       this.throwHttpException('User could not be updated', ErrorsType.USER_DOES_NOT_UPDATE, HttpStatus.UNPROCESSABLE_ENTITY)
     }
