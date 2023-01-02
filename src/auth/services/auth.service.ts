@@ -47,11 +47,7 @@ export class AuthService {
     const userfind = await this.userService.findUserByEmail(user.email)
     const payload = { email: user.email, sub: user.id }
     const userAuth = {
-      email: user.email,
-      user_id: userfind.user_id,
-      user_name: userfind?.user_name,
-      photo: userfind?.photo,
-      creation_date: userfind?.creation_date,
+      ...userfind,
       access_token: this.jwtService.sign(payload)
     }
     return userAuth
