@@ -126,7 +126,13 @@ export class UserService {
       where: {
         user_id: userId
       },
-      select: ['photo', 'user_id', 'user_name']
+      select: {
+        creation_date: true,
+        occupation_area: true,
+        photo: true,
+        user_id: true,
+        user_name: true
+      }
     })
     if (!user) {
       this.throwHttpException('User not found', ErrorsType.NOT_FOUND, HttpStatus.BAD_REQUEST)
