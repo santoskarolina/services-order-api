@@ -99,7 +99,13 @@ export class UserService {
       where: {
         email
       },
-      select: ['creation_date', 'email', 'photo', 'user_name', 'user_id']
+      select: {
+        creation_date: true,
+        occupation_area: true,
+        photo: true,
+        user_id: true,
+        user_name: true
+      }
     })
     return user
   }
